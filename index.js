@@ -9,7 +9,7 @@ const h = window.innerHeight;
 
 const scene = new THREE.Scene();
 
-const fov = 75; // Camera frustum vertical field of view
+const fov = 50; // Camera frustum vertical field of view
 const aspect = w / h; //Camera frustum aspect ratio
 const near = 0.1; //Camera frustm ner plane
 const far = 1000; //Camera frustum far plane
@@ -20,6 +20,9 @@ const renderer = new THREE.WebGLRenderer({  antialias: true });
 renderer.setSize(w, h);
 document.body.appendChild(renderer.domElement);
 
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+
 const earthGroup = new THREE.Group();
 earthGroup.rotation.z = -23.4 * Math.PI / 180;
 scene.add(earthGroup);
@@ -29,7 +32,11 @@ const detail = 12;
 const loader = new THREE.TextureLoader();
 const geometry = new THREE.IcosahedronGeometry(1, detail);
 const material = new THREE.MeshStandardMaterial({
-    map: loader.load("./textures/00_earthmap1k.jpg")
+    map: loader.load("./textures/00_earthmap1k.jpg"),
+    specularMap: loader.load("./textures/02_earthspec1k.jpg"),
+    bumpMap: loader.load("./textures/01_earthbump1k.jpg"),
+    bumpScale: 0.04,
+
 });
 const earthMesh = new THREE.Mesh(geometry, material);
 earthGroup.add(earthMesh);
@@ -44,6 +51,9 @@ earthGroup.add(lightsMesh);
 const cloudsMat = new THREE.MeshStandardMaterial({
     map: loader.load("./textures/04_earthcloudmap.jpg"),
     blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: 0.8,
+    alphaMap: loader.load('./textures/05_earthcloudmaptrans.jpg'),
 })
 const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
 cloudsMesh.scale.setScalar(1.003);
@@ -54,7 +64,7 @@ const glowMesh = new THREE.Mesh(geometry, fresnelMat);
 glowMesh.scale.setScalar(1.01);
 earthGroup.add(glowMesh);
 
-const stars = getStarfield({ numStars: 8000 });
+const stars = getStarfield({ numStars: 20000 });
 scene.add(stars);
 
 const sunLight = new THREE.DirectionalLight(0xffffff, 2.0);
